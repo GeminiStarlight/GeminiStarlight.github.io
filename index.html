@@ -1,9 +1,501 @@
-<html>
-  <head>
-    <title>Oi!</title>
-  </head>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-  <body>
-    <h1>My Name is JiaAn.</h1>
-  </body>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0f0f1e;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .dashboard {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: rgba(255, 255, 255, 0.05);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 30px 20px;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .logo {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-item {
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-item:hover {
+            background: rgba(103, 126, 234, 0.2);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .main-content {
+            margin-left: 250px;
+            flex: 1;
+            padding: 30px;
+            position: relative;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .header h1 {
+            font-size: 2em;
+        }
+
+        .search-bar {
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 25px;
+            color: white;
+            width: 300px;
+            outline: none;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .stat-card {
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            margin: 10px 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            opacity: 0.7;
+            font-size: 0.9em;
+        }
+
+        .posts-section {
+            position: relative;
+            cursor: none;
+        }
+
+        .section-title {
+            font-size: 1.5em;
+            margin-bottom: 25px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .posts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 25px;
+            position: relative;
+        }
+
+        .post-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            z-index: 5;
+        }
+
+        .post-card:hover {
+            box-shadow: 0 10px 40px rgba(103, 126, 234, 0.3);
+        }
+
+        .post-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3em;
+            opacity: 0.3;
+        }
+
+        .post-content {
+            padding: 20px;
+        }
+
+        .post-title {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .post-excerpt {
+            opacity: 0.7;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .post-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85em;
+            opacity: 0.6;
+        }
+
+        .post-author {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .bg-bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle at center, 
+                rgba(103, 126, 234, 0.15) 0%, 
+                rgba(118, 75, 162, 0.1) 50%, 
+                rgba(103, 126, 234, 0.05) 100%);
+            pointer-events: none;
+            transition: transform 0.15s ease-out;
+            z-index: 1;
+        }
+
+        .custom-cursor {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(103, 126, 234, 0.8);
+            border-radius: 50%;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            display: none;
+            transition: width 0.2s, height 0.2s;
+        }
+
+        .custom-cursor::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 6px;
+            height: 6px;
+            background: rgba(103, 126, 234, 0.8);
+            border-radius: 50%;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 80px;
+            }
+            .main-content {
+                margin-left: 80px;
+            }
+            .nav-item span {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="custom-cursor" id="customCursor"></div>
+    
+    <div class="dashboard">
+        <aside class="sidebar">
+            <div class="logo">Dashboard</div>
+            <nav>
+                <div class="nav-item active">
+                    <span>📊</span>
+                    <span>Overview</span>
+                </div>
+                <div class="nav-item">
+                    <span>📝</span>
+                    <span>Posts</span>
+                </div>
+                <div class="nav-item">
+                    <span>👥</span>
+                    <span>Users</span>
+                </div>
+                <div class="nav-item">
+                    <span>📈</span>
+                    <span>Analytics</span>
+                </div>
+                <div class="nav-item">
+                    <span>⚙️</span>
+                    <span>Settings</span>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <h1>Welcome Back!</h1>
+                <input type="text" class="search-bar" placeholder="Search...">
+            </header>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Posts</div>
+                    <div class="stat-value">1,234</div>
+                    <div class="stat-label">↑ 12% from last month</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Active Users</div>
+                    <div class="stat-value">856</div>
+                    <div class="stat-label">↑ 8% from last month</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Engagement</div>
+                    <div class="stat-value">94%</div>
+                    <div class="stat-label">↑ 3% from last month</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Revenue</div>
+                    <div class="stat-value">$45K</div>
+                    <div class="stat-label">↑ 15% from last month</div>
+                </div>
+            </div>
+
+            <section class="posts-section" id="postsSection">
+                <h2 class="section-title">Recent Posts</h2>
+                <div class="posts-grid">
+                    <div class="post-card">
+                        <div class="post-image">🎨</div>
+                        <div class="post-content">
+                            <h3 class="post-title">Getting Started with Web Design</h3>
+                            <p class="post-excerpt">Learn the fundamentals of modern web design and create stunning interfaces that users love.</p>
+                            <div class="post-meta">
+                                <div class="post-author">
+                                    <div class="avatar"></div>
+                                    <span>Sarah Chen</span>
+                                </div>
+                                <span>2 hours ago</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="post-card">
+                        <div class="post-image">💻</div>
+                        <div class="post-content">
+                            <h3 class="post-title">JavaScript Tips and Tricks</h3>
+                            <p class="post-excerpt">Discover advanced JavaScript techniques that will make your code cleaner and more efficient.</p>
+                            <div class="post-meta">
+                                <div class="post-author">
+                                    <div class="avatar"></div>
+                                    <span>Mike Johnson</span>
+                                </div>
+                                <span>5 hours ago</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="post-card">
+                        <div class="post-image">🚀</div>
+                        <div class="post-content">
+                            <h3 class="post-title">Building Scalable Applications</h3>
+                            <p class="post-excerpt">Best practices for creating applications that grow with your user base and business needs.</p>
+                            <div class="post-meta">
+                                <div class="post-author">
+                                    <div class="avatar"></div>
+                                    <span>Emily Davis</span>
+                                </div>
+                                <span>1 day ago</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="post-card">
+                        <div class="post-image">🎯</div>
+                        <div class="post-content">
+                            <h3 class="post-title">UX Design Principles</h3>
+                            <p class="post-excerpt">Understanding user experience fundamentals to create intuitive and delightful products.</p>
+                            <div class="post-meta">
+                                <div class="post-author">
+                                    <div class="avatar"></div>
+                                    <span>Alex Kim</span>
+                                </div>
+                                <span>2 days ago</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="post-card">
+                        <div class="post-image">📱</div>
+                        <div class="post-content">
+                            <h3 class="post-title">Mobile First Development</h3>
+                            <p class="post-excerpt">Why starting with mobile design leads to better responsive websites and applications.</p>
+                            <div class="post-meta">
+                                <div class="post-author">
+                                    <div class="avatar"></div>
+                                    <span>Rachel Lee</span>
+                                </div>
+                                <span>3 days ago</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="post-card">
+                        <div class="post-image">🔒</div>
+                        <div class="post-content">
+                            <h3 class="post-title">Web Security Essentials</h3>
+                            <p class="post-excerpt">Protect your applications and users with these fundamental security best practices.</p>
+                            <div class="post-meta">
+                                <div class="post-author">
+                                    <div class="avatar"></div>
+                                    <span>David Park</span>
+                                </div>
+                                <span>4 days ago</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const postsSection = document.getElementById('postsSection');
+        const customCursor = document.getElementById('customCursor');
+        const bubbles = [];
+        const bubbleCount = 30;
+
+        // Create background bubbles
+        for (let i = 0; i < bubbleCount; i++) {
+            const bubble = document.createElement('div');
+            bubble.className = 'bg-bubble';
+            const size = Math.random() * 120 + 60;
+            bubble.style.width = size + 'px';
+            bubble.style.height = size + 'px';
+            
+            const x = Math.random() * postsSection.offsetWidth;
+            const y = Math.random() * 1500;
+            
+            bubble.dataset.originalX = x;
+            bubble.dataset.originalY = y;
+            bubble.style.left = x + 'px';
+            bubble.style.top = y + 'px';
+            
+            postsSection.appendChild(bubble);
+            bubbles.push(bubble);
+        }
+
+        let mouseX = 0, mouseY = 0;
+        let isInPostsSection = false;
+
+        // Mouse move handler for posts section
+        postsSection.addEventListener('mousemove', (e) => {
+            isInPostsSection = true;
+            const rect = postsSection.getBoundingClientRect();
+            mouseX = e.clientX - rect.left;
+            mouseY = e.clientY - rect.top + postsSection.scrollTop;
+            
+            customCursor.style.left = e.clientX + 'px';
+            customCursor.style.top = e.clientY + 'px';
+            customCursor.style.display = 'block';
+            
+            // Repel bubbles
+            bubbles.forEach(bubble => {
+                const bubbleX = parseFloat(bubble.dataset.originalX) + parseFloat(bubble.style.width) / 2;
+                const bubbleY = parseFloat(bubble.dataset.originalY) + parseFloat(bubble.style.height) / 2;
+                
+                const dx = bubbleX - mouseX;
+                const dy = bubbleY - mouseY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                const repelRadius = 200;
+                
+                if (distance < repelRadius) {
+                    const force = (repelRadius - distance) / repelRadius;
+                    const angle = Math.atan2(dy, dx);
+                    const pushX = Math.cos(angle) * force * 80;
+                    const pushY = Math.sin(angle) * force * 80;
+                    
+                    bubble.style.transform = `translate(${pushX}px, ${pushY}px) scale(${1 + force * 0.2})`;
+                    bubble.style.opacity = 0.3 + force * 0.4;
+                } else {
+                    bubble.style.transform = 'translate(0, 0) scale(1)';
+                    bubble.style.opacity = 1;
+                }
+            });
+        });
+
+        postsSection.addEventListener('mouseleave', () => {
+            isInPostsSection = false;
+            customCursor.style.display = 'none';
+            bubbles.forEach(bubble => {
+                bubble.style.transform = 'translate(0, 0) scale(1)';
+                bubble.style.opacity = 1;
+            });
+        });
+
+        // Reposition bubbles on window resize
+        window.addEventListener('resize', () => {
+            bubbles.forEach(bubble => {
+                const x = Math.random() * postsSection.offsetWidth;
+                bubble.dataset.originalX = x;
+                bubble.style.left = x + 'px';
+            });
+        });
+    </script>
+</body>
 </html>
